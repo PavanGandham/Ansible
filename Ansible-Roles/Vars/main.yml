@@ -1,0 +1,8 @@
+friends: ['Scott','Mike', 'John','Tony']
+custom_heading: "Welcome to my website of DevOps using Ansible"
+todays_date: "{{ ansible_facts['date_time']['date'] }}"
+host_name: "{{ ansible_facts['hostname'] }}"
+fqdn_name: "{{ ansible_facts['fqdn'] }}"
+ip_address: "{{ andible_facts['eth0']['ipv4']['address'] }}"
+os_family: "{{ ansible_facts['distribution'] }}"
+os_dest: "{{ ansible_facts['distribution_version'] }}"

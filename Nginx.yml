@@ -1,0 +1,42 @@
+---
+  - name: Play for Installing Nginx
+    hosts: web:app
+    gather_facts: no
+    #remote_user: root
+    tasks:
+      - name: Performing Apt Update
+        shell: apt update
+        tags:
+          - apt
+
+      - name: Installing Nginx Using Apt
+        apt:
+          name: nginx
+          state: present
+        tags:
+          - nginxtask
+
+      - name: Starting Nginx Service
+        shell: service nginx start
+        tags:
+          - service
+    tags:
+      - nginx
+
+  - name: Play for Installing Tools
+    hosts: db
+    tasks:
+      - name: Performing Apt Update
+        shell: apt update
+
+      - name: Installing Tools like [jq]-[curl]-[wget]-[unzip]
+        apt:
+          name: "{{ item }}"
+          state: present
+        with_items:
+          - jq
+          - wget
+          - curl
+          - unzip
+    tags:
+      - tools

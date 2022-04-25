@@ -1,0 +1,23 @@
+---
+all:
+  children:
+    controller:
+      hosts:
+        10.40.1.224:
+    clients:
+      hosts:
+        10.40.2.171:
+        10.40.3.122:
+---
+all:
+  children:
+    controller:
+      hosts:
+        mgmt:
+          ansible_host: 10.40.1.224
+    clients:
+      hosts:
+        client1:
+          ansible_host: 10.40.2.171
+        client2:
+          ansible_host: 10.40.3.122

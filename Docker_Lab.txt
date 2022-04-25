@@ -1,0 +1,287 @@
+ssh -o StrictHostKeyChecking=no root@ip-10-80-1-33
+
+1. Download the Docker image from hub.docker.com
+docker pull sreeharshav/ubuntu16:withssh2.0_V2
+docker pull sreeharshav/ubuntu16:ansible2.75_V2
+
+2. Create a new network as below:
+docker network create --subnet 172.20.0.0/16 --gateway 172.20.0.254 ansible_nw
+
+3.Create three machines as below using the above network.
+curl https://get.docker.com | bash
+docker network create --subnet 172.20.0.0/16 --gateway 172.20.0.254 ansible_nw
+
+docker run --rm -dit --name controller --hostname controller --network ansible_nw sreeharshav/ubuntu16:ansible2.75_V2
+
+docker run --rm -dit --name web1 --hostname web1 -p 8000:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name web2 --hostname web2 -p 8001:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name web3 --hostname web3 -p 8002:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name app1 --hostname app1 -p 9000:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name app2 --hostname app2 -p 9001:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name app3 --hostname app3 -p 9002:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db1 --hostname db1 -p 9003:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db2 --hostname db2 -p 9004:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db3 --hostname db3 -p 9005:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+docker run --rm -dit --name db4 --hostname db4 -p 9006:80 --network ansible_nw sreeharshav/ubuntu16:withssh2.0_V2
+
+CENTOS CONTAINERS:
+docker run --rm -dit --name cent1 --hostname cent1 -p 7000:80 --network ansible_nw sreeharshav/centos7:withssh2.0_V1
+docker run --rm -dit --name cent2 --hostname cent2 -p 7001:80 --network ansible_nw sreeharshav/centos7:withssh2.0_V1
+docker run --rm -dit --name cent3 --hostname cent3 -p 7002:80 --network ansible_nw sreeharshav/centos7:withssh2.0_V1
+
+From When Statement:
+docker run --rm -dit --name rhel1 --hostname rhel1 --network ansible_nw sreeharshav/centos7:withssh2.0_V1
+docker run --rm -dit --name rhel2 --hostname rhel2 --network ansible_nw sreeharshav/centos7:withssh2.0_V1
+
+-----------------ANSIBLE 2.9 LAB------------------------------------------------------------------------------------------------------
+docker network create --subnet 172.20.0.0/16 --gateway 172.20.0.254 ansible_nw
+docker run --rm -dit --name controller --hostname controller --network ansible_nw sreeharshav/ubuntu18:ansible2.9
+docker run --rm -dit --name web1 --hostname web1 -p 8000:80 --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name web2 --hostname web2 -p 8001:80 --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name web3 --hostname web3 -p 8002:80 --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name app1 --hostname app1 -p 9000:80 --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name app2 --hostname app2 -p 9001:80 --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name app3 --hostname app3 -p 9002:80 --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name db1 --hostname db1 -p 9003:80   --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name db2 --hostname db2 -p 9004:80   --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name db3 --hostname db3 -p 9005:80   --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+docker run --rm -dit --name db4 --hostname db4 -p 9006:80   --network ansible_nw sreeharshav/ubuntu18:withssh2.0
+
+4. Go in to the machine1
+docker exec -it machine1 /bin/bash
+
+5.ping machine 2,3,4
+
+6.Install Anible using below command  
+apt-get install ansible -y
+
+7. Run ansible --version and you should get response as ansible 2.7.5
+
+8.Create a file called hosts using following command.   
+nano hosts
+
+9. Add the following in the hosts file and save it.
+[local]
+localhost
+[servers]
+machine2
+machine3
+machine4
+
+10. Run the following commands:
+
+root@machine1:/# ansible -i hosts localhost -m ping
+The authenticity of host 'localhost (127.0.0.1)' can't be established.
+ECDSA key fingerprint is SHA256:c4csd9e01W96sDmuauZAKuE6kBYURt/5TJhAm8ARy7g.
+Are you sure you want to continue connecting (yes/no)? yes
+localhost | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+
+root@machine1:/# ansible -i hosts machine2 -m ping
+The authenticity of host 'machine2 (172.20.0.2)' can't be established.
+ECDSA key fingerprint is SHA256:c4csd9e01W96sDmuauZAKuE6kBYURt/5TJhAm8ARy7g.
+Are you sure you want to continue connecting (yes/no)? yes
+machine2 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+
+root@machine1:/# ansible -i hosts machine3 -m ping
+The authenticity of host 'machine3 (172.20.0.3)' can't be established.
+ECDSA key fingerprint is SHA256:c4csd9e01W96sDmuauZAKuE6kBYURt/5TJhAm8ARy7g.
+Are you sure you want to continue connecting (yes/no)? yes
+machine3 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+
+root@machine1:/# ansible -i hosts machine4 -m ping
+The authenticity of host 'machine4 (172.20.0.4)' can't be established.
+ECDSA key fingerprint is SHA256:c4csd9e01W96sDmuauZAKuE6kBYURt/5TJhAm8ARy7g.
+Are you sure you want to continue connecting (yes/no)? yes
+machine4 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+
+root@machine1:/# ansible -i hosts servers -m ping
+machine4 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+machine3 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+machine2 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+
+11. The above confirmation for asking is called host_key_checking. 
+We need to disable that in /etc/ansible/ansible.cfg.    
+Go to the above file and make it as host_key_checking = False . 
+
+12. Once the change is done, got back to host and stop machine 2,3,4 and since we used --rm the containers will be deleted. 
+Create them again as below.
+docker run --rm -dit --name machine2 --hostname machine2 --network ansible_nw sreeharshav/ubuntu16:withssh2.0
+docker run --rm -dit --name machine3 --hostname machine3 --network ansible_nw sreeharshav/ubuntu16:withssh2.0
+docker run --rm -dit --name machine4 --hostname machine3 --network ansible_nw sreeharshav/ubuntu16:withssh2.0
+
+13. Go to the machine 1 using the command 
+docker exec -it machine1 /bin/bash
+
+14. Run the command "ansible -i hosts servers -m ping" and since the key is disabled the response should be as below.
+root@machine1:/# ansible -i hosts servers -m ping
+machine4 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+machine3 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+machine2 | SUCCESS => {    
+    "changed": false,    
+    "ping": "pong"
+}
+
+15. Create a user using the following command:
+ansible -i hosts  servers -m user -a "user=testuser password=$1$DEbGy.Rc$jsamn44wm0aKhmc0TYmgv1"
+
+16. Confirm by running ansible -i hosts  servers -m command -a "cat /etc/passwd"
+
+----------------------------------Completed------------------------------------
+
+---------------------------HOST-PATTERNS---------------------------------------
+
+ansible -i hosts 'all:&hello:!localhost' -a free #Include hosts intersection of all & hello and exclude localhost
+ansible -i hosts 'all:!db:!localhost' -a free # Include all hosts and exclude DB and Localhost
+ansible -i hosts 'web:app:db:!localhost' -a free # Include all hosts and exclude Localhost
+#Selective hosts in group and exclude Localhost
+ansible -i hosts db[0:3] -a free
+ansible -i hosts db1:db2:db3:db4 -a free
+
+-------------------------------Ansible-AdHoc-Commands--------------------------
+
+ansible -i hosts_ansible clients -m file -a 'path=/tmp/testfile1 state=touch'
+ansible -i hosts_ansible clients -m user -a "name=testuser1 state=present"
+ansible -i hosts all -m pingansible -i hosts all -m ping -f 1
+ansible -i hosts all -m command -a hostname
+ansible -i hosts all -m command -a uptime
+ansible -i hosts all -m command -a free
+ansible -i hosts all -m command -a df -h
+ansible app -s -a "yum install -y docker-engine"
+ansible -i hosts all  -a "cat /etc/passwd"
+ansible -i hosts servers:app  -a free --limit machine2 
+ansible -i hosts all -a uptime --limit servers
+ansible -i hosts prod -a free (clildren as app & servers)
+ansible -i hosts 'servers:!app' -a free
+ansible -i hosts 'sertp' -a free
+ansible -i hosts servers[0] -a uptime
+ansible -i hosts servers[0:2] -a uptime
+ansible -i hosts servers[2:] -a uptime
+ansible -i hosts  servers -m user -a "user=testuser password=$1$pGP3ICXv$6PEDQI/N1RgLzVr/l00YY0"
+ansible app -s -m group -a "name=admin state=present"
+ansible app -s -m user -a "name=devops group=admin createhome=yes"
+ansible app -m copy -a "src=/vagrant/test.txt dest=/tmp/test.txt"
+
+----------------------------------Completed-------------------------------------
+
+----------------------------Ansible-Playbook-Commands---------------------------
+
+ansible-playbook playbook.yml --list-hosts
+ansible-playbook playbook.yml --syntax-check
+ansible-playbook playbook.yml --syntax-check --verbose
+
+HOST-PATTERN:
+https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
+https://www.middlewareinventory.com/blog/ansible-ad-hoc-command-examples-cheat-sheet/
+https://docs.ansible.com/ansible/latest/user_guide/intro_patterns.html
+https://docs.ansible.com/ansible/latest/user_guide/intro_adhoc.html
+
+-----------------------------------------------CACHING FACTS-----------------------------------------------
+
+https://andreas.scherbaum.la/blog/archives/1019-Local-caching-of-Ansible-Facts.html
+
+How to enable the cache?
+As mentioned before, this example is using the "jsonfile" cache. 
+The following settings need to be added to "ansible.cfg" in the 
+
+Playbook directory:
+
+gathering = smart
+gather_subset = all
+fact_caching = jsonfile
+fact_caching_connection = facts.json
+fact_caching_timeout = 86400
+
+Ansible has different ways when to gather facts: "implicit" is the default, 
+and will re-gather facts at the beginning of every Playbook run. This setting will ignore any facts cache. 
+The inverse is "explicit", and will not gather facts until and unless explicitely requested by a "setup" task. 
+The "smart" option will only gather facts if no cached facts are available.
+
+The "gather_subset = all" is Ansible default, and will gather all destination host details. 
+This can be limited to a certain subset, if not all the information are required.
+
+"fact_caching = jsonfile" defines the cache type, and 
+"fact_caching_connection = facts.json" specifies the directory name 
+which Ansible will use to store the cache. The directory 
+"facsts.json"will be created in the Playbook directory, if no 
+absolute path is specified.
+
+Finally "fact_caching_timeout = 86400" specifies that the gathered 
+data is valid for one day (86400 seconds). After that time, Ansible 
+will gather new data from the destination hosts. This number should 
+depend on how often the Playbook runs, and how often critical system 
+changes are applied.
+---------------------------------------REDIS-INSTALLATION-FOR-FACTS_CACHING--------------------------------------------------------
+docker run --rm -dit -p 6379:6379 --network ansible_nw --name ansibleredis redis
+Install pip and Install redis on the controller
+apt install -y  python3-pip
+pip3 install redis
+docker exec -it ansibleredis redis-cli
+-> keys *
+-> mget "ansible_facts_web1"
+-> del backup4
+
+
+
+"Change the caching as redis in /etc/ansible/ansible.cfg"
+
+gathering = smart
+fact_caching_timeout = 86400
+fact_caching = redis
+fact_caching_prefix = ansible_facts_
+fact_caching_connection = ansibleredis:6379
+
+
+
+
+------------------------ANSIBLE-DOCKER-INSTALLATION---------------------
+
+[all_Servers]
+ip-10-1-1-111.ec2.internal
+ip-10-1-1-158.ec2.internal
+ip-10-1-1-244.ec2.internal
+ip-10-1-1-216.ec2.internal
+
+[docker_master]
+ip-10-1-1-158.ec2.internal
+
+[docker_nodes]
+ip-10-1-1-244.ec2.internal
+ip-10-1-1-216.ec2.internal
+
+ansible -i ansible_hosts docker_nodes:docker_master -m shell -a 
+'curl https://get.docker.com | bash'
+ansible -i ansible_hosts docker_master -m shell -a 'docker swarm init'
+TOKEN=$(ansible -i ansible_hosts docker_master -m shell -a 'docker swarm join-token worker -q' | tail -1)
+
+#ansible -i ansible_hosts docker_nodes -m shell -a 
+'curl https://get.docker.com | bash'
+MASTER_PVIP=$(ansible -i ansible_hosts ip-10-1-1-158.ec2.internal -m shell -a 
+'curl -sL http://169.254.169.254/latest/meta-data/local-ipv4' | tail -1)
+ansible -i ansible_hosts docker_nodes -m shell -a "docker swarm join --token $TOKEN $MASTER_PVIP:2377"

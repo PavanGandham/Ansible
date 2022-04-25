@@ -1,0 +1,47 @@
+---
+  - name: Create set of users
+    hosts: all
+    gather_facts: yes
+    vars:
+      os1family: "Debian"
+      os2family: "Redhat"
+      password: "$1$oEe4m6pU$AAiaKEiYrrcOHW3v3oj7d."
+    tasks:
+      - name: Create Ubuntu Users 1,2,3,4,5
+        user: >
+          name={{ item }}
+          state=absent
+          shell=/bin/bash
+          password={{ password }}
+        with_items:
+          - ubuntuuser1
+          - ubuntuuser2
+          - ubuntuuser3
+          - ubuntuuser4
+          - ubuntuuser5
+        when:
+          (ansible_os_family == "{{ os1family }}" and ansible_distribution_version == "16.04") or
+          (ansible_os_family == "{{ os1family }}" and ansible_distribution_version == "18.04")
+      - debug:
+          msg: The OS Family is {{ ansible_os_family }}
+        tags:
+          - ubuntu
+          - test
+      - name: Create RHEL Users 1,2,3,4,5
+        user: >
+          name={{ item }}
+          shell=/bin/bash
+          password={{ password }}
+        with_items:
+          - rheluser1
+          - rheluser2
+          - rheluser3
+          - rheluser4
+          - rheluser5
+        when:
+          ansible_os_family == "{{ os2family }}"
+      - debug:
+          msg: The OS Family id {{ ansible_os_family }}
+        tags:
+          - rhel
+          - prod

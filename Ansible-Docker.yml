@@ -1,0 +1,37 @@
+---
+- name: Install Docker On All Nodes
+  hosts: docker_servers
+  tasks:
+    - name: Install Docker on all docker_servers
+      shell: curl https://get.docker.com | bash
+
+    - name: Check Docker Version
+      shell: docker version | grep -w Version | head -1
+      register: version
+    - debug:
+        var: version
+  tags:
+    - install
+
+- name: Enable Docker Swarm
+  hosts: docker_masters
+  tasks:
+    - name: Enable Docker Swarm on Master docker_servers
+      shell: docker swarm init
+      ignore_errors: yes
+    - name: Get Docker Worker Token
+      shell: docker swarm join-token -q worker
+      register: token
+    - debug:
+        var: token.stdout
+  tags:
+    - swarm
+- name: Add Workers to Swarm
+  hosts: docker_workers
+  tasks:
+    - debug:
+        var: token.stdout
+    - name: Add Workers to Swarm
+      shell: docker swarm join --token "{{ token.stdout }}" 10.40.1.119:2377
+  tags:
+    - workers

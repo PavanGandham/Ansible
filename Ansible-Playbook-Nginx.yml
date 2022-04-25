@@ -1,0 +1,213 @@
+#---------------------------Basic-Playbook-To-Install-Nginx---------------------------
+---
+- name: Playbook For Installing Nginx
+  hosts: web
+  gather_facts: no
+  tasks:
+    - name: Perform Apt Update
+      shell: apt update
+    - name: Install Nginx
+      shell: apt install nginx -y
+    - name: Start Nginx Service
+      shell: service nginx start
+
+#------------------------Nginx-Install-Using-Controller-Local-Folder---------------------
+---
+- name: Play for Install Nginx on Webservers
+  hosts: web
+  gather_facts: no
+  tasks:
+    - name: Run Apt Update
+      shell: apt update
+    - name: Install Nginx Server
+      apt: >
+        name=nginx
+        state=present
+    - name: Copy the files to index destination folder.
+      copy: >
+        src=/tmp/dockertest1/index.html
+        dest=/var/www/html/index.nginx-debian.html
+        owner=root
+        group=root
+        mode=0644
+    - name: Copy the style files to destination folder.
+      copy: >
+        src=/tmp/dockertest1/style.css
+        dest=/var/www/html/style.css
+        owner=root
+        group=root
+        mode=0644
+    - name: Copy the JavaScript files to destination folder.
+      copy: >
+        src=/tmp/dockertest1/scorekeeper.js
+        dest=/var/www/html/scorekeeper.js
+        owner=root
+        group=root
+        mode=0644
+    - name: Restart Nginx
+      command: service nginx restart
+
+#--------------------------------------Completed------------------------------------------------------------
+
+#----------------------------------Tags-for-Plays-Installing-Application------------------------------------
+
+---
+- name: Play for installing Nginx
+  hosts: web:app
+  tasks:
+    - name: Perform Apt Update
+      shell: apt update
+      tags:
+        - apt
+    - name: Install Nginx using Apt
+      apt: 
+        name: nginx
+        state: present
+      tags:
+        - nginxtask
+    - name: Start the Nginx Service
+      shell: service nginx start
+      tags:
+        - service 
+  tags:
+    - nginx
+---
+- name: Play for Installing jq,wget,curl
+    hosts: db
+    tasks:
+      - name: Perform Apt Update
+        shell: apt update
+      - name: Installing Tools
+        apt:
+          name: "{{ item }}"
+          state: present
+        with_items:
+          - jq
+          - wget
+          - curl
+    tags:
+      - tools
+
+# ansible-playbook -i hosts nginx3.yaml --tags tools && ansible-palybook -i hosts nginx3.yml --tags nginx
+
+#----------------------------Play-For-Install-Configure-Nginx-------------------------------------------------
+
+---
+- name: Play for Installing Nginx
+  tags: nginx
+  hosts: web
+  tasks:
+    - name: Perform Apt Update
+      shell: apt update
+    - name: Install Nginx
+      shell: apt install nginx -y
+    - name: Start Nginx Server
+      shell: service nginx start
+
+#----------------------------Play-For-Creating-devuser 1 to 5------------------------------------------------
+
+---
+- name: Play for creating devuser 1 to 5
+  tags: devusershosts: web:app:db
+  tasks:
+    - name: Creating devuser 1 to 5
+      user:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - devuser1
+        - devuser2
+        - devuser3
+        - devuser4
+        - devuser5
+
+#-----------------------------Install-AWS-CLI-on-App-Servers------------------------------------------------
+---
+- name: Install AWS CLI on App Servers
+  tags: awscli
+  hosts: app
+  tasks:
+    - name: Install unzip on app servers
+      shell: apt install unzip -y
+    - name: Download AWS CLI
+      get_url:
+        url: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: ./awscliv2.zip
+    - name: Unzip file & Install
+      shell: unzip awscliv2.zip && ./aws/install
+
+#----------------------------Nginx-Install-Using-Controller-Local-Folder-With-Tags-for-Tasks-----------------
+---
+- name: Play for Install Nginx on Webservers
+  hosts: web
+  gather_facts: no
+  tasks:
+    - name: Run Apt Update
+      shell: apt update
+      tags:
+        - update
+    - name: Install Nginx Server
+      apt: >
+        name=nginx
+        state=present
+      tags:
+        - install
+    - name: Copy the files to index destination folder
+      copy: >
+        src=/tmp/dockertest1/index.html
+        dest=/var/www/html/index.nginx-debian.html
+        owner=root
+        group=root
+        mode=0644
+      tags:
+        - html
+    - name: Copy the style files to destination folder.
+      copy: >
+        src=/tmp/dockertest1/style.css
+        dest=/var/www/html/style.css
+        owner=root
+        group=root
+        mode=0644
+      tags:
+        - css
+    - name: Copy the javascript files to destination folder.
+      copy: >
+        src=/tmp/dockertest1/scorekeeper.js
+        dest=/var/www/html/scorekeeper.js
+        owner=root
+        group=root
+        mode=0644
+      tags:
+        - js
+    - name: Restart Nginx.
+      command: service nginx restart
+      tags:
+        - service
+
+#--------------------------------------Completed--------------------------------------------------------------
+
+#-----------------------Nginx-Install-Using-Client-Local-Nginx-Folder-----------------------------------------
+
+---
+- name: Play for Install Nginx on Webservers
+  hosts: web
+  gather_facts: no
+  serial: 1    # Executes the playbook one host at a time
+  tasks:
+    - name: Run Apt Update.
+      shell: apt update
+      tags:
+        - update
+    - name: Clone Git Repo.
+      shell: cd /tmp && git clone https://github.com/PavanGandham/dockertest1.git
+      tags:
+        - clone
+    - name: Install Nginx Server
+      apt: >
+        name=nginx
+        state=present
+      tags:
+        - install
+    - name: 
+
+

@@ -1,0 +1,174 @@
+---
+- name: Change file ownership, group and permissions  
+  file:    
+    path: /etc/foo.conf    
+    owner: foo    
+    group: foo    
+    mode: '0644'
+
+
+- name: Give insecure permissions to an existing file  
+  file:    
+    path: /work    
+    owner: root    
+    group: root    
+    mode: '1777'
+
+
+- name: Create a symbolic link  
+  file:    
+    src: /file/to/link/to    
+    dest: /path/to/symlink    
+    owner: foo    
+    group: foo    
+    state: link
+
+
+- name: Create two hard links  
+  file:    
+    src: '/tmp/{{ item.src }}'    
+    dest: '{{ item.dest }}'    
+    state: hard  
+  loop:    
+    - { src: x, dest: y }    
+    - { src: z, dest: k }
+
+
+- name: Touch a file, using symbolic modes to set the permissions (equivalent to 0644)  
+  file:    
+    path: /etc/foo.conf    
+    state: touch    
+    mode: u=rw,g=r,o=r
+
+
+- name: Touch the same file, but add/remove some permissions  
+  file:    
+    path: /etc/foo.conf    
+    state: touch    
+    mode: u+rw,g-wx,o-rwx
+
+
+- name: Touch again the same file, but dont change times this makes the task idempotent  
+  file:    
+    path: /etc/foo.conf    
+    state: touch    
+    mode: u+rw,g-wx,o-rwx    
+    modification_time: preserve    
+    access_time: preserve
+
+
+- name: Create a directory if it does not exist  
+  file:    
+    path: /etc/some_directory    
+    state: directory    
+    mode: '0755'
+
+
+- name: Update modification and access time of given file  
+  file:    
+    path: /etc/some_file    
+    state: file    
+    modification_time: now    
+    access_time: now
+
+
+- name: Set access time based on seconds from epoch value  
+  file:    
+    path: /etc/another_file    
+    state: file    
+    access_time: '{{ "%Y%m%d%H%M.%S" | strftime(stat_var.stat.atime) }}'
+
+
+- name: Recursively change ownership of a directory  
+  file:    
+    path: /etc/foo    
+    state: directory    
+    recurse: yes    
+    owner: foo    
+    group: foo
+
+
+- name: Remove file (delete file)  
+  file:    
+    path: /etc/foo.txt    
+    state: absent
+
+
+- name: Recursively remove directory  
+  file:    
+  path: /etc/foo    
+  state: absent
+
+
+#---------------------------------------------File-Copy--------------------------------------------------------------------------------
+
+- name: Copy file with owner and permissions  
+  copy:    
+    src: /srv/myfiles/foo.conf    
+    dest: /etc/foo.conf    
+    owner: foo    
+    group: foo    
+    mode: '0644'
+
+
+- name: Copy file with owner and permission, using symbolic representation  
+  copy:    
+    src: /srv/myfiles/foo.conf    
+    dest: /etc/foo.conf    
+    owner: foo    
+    group: foo    
+    mode: u=rw,g=r,o=r
+
+
+- name: Another symbolic mode example, adding some permissions and removing others  
+  copy:    
+    src: /srv/myfiles/foo.conf    
+    dest: /etc/foo.conf    
+    owner: foo    
+    group: foo    
+    mode: u+rw,g-wx,o-rwx
+
+
+- name: Copy a new "ntp.conf file into place, backing up the original if it differs from the copied version  
+  copy:    
+    src: /mine/ntp.conf    
+    dest: /etc/ntp.conf    
+    owner: root    
+    group: root    
+    mode: '0644'    
+    backup: yes
+
+
+- name: Copy a new "sudoers" file into place, after passing validation with visudo  
+  copy:    
+    src: /mine/sudoers    
+    dest: /etc/sudoers    
+    validate: /usr/sbin/visudo -csf %s
+
+
+- name: Copy a "sudoers" file on the remote machine for editing  
+  copy:    
+    src: /etc/sudoers    
+    dest: /etc/sudoers.edit    
+    remote_src: yes    
+    validate: /usr/sbin/visudo -csf %s
+
+
+- name: Copy using inline content  
+  copy:    
+    content: '# This file was moved to /etc/other.conf'    
+    dest: /etc/mine.conf
+
+
+- name: If follow=yes, /path/to/file will be overwritten by contents of foo.conf  
+  copy:    
+    src: /etc/foo.conf    
+    dest: /path/to/link  # link to /path/to/file    
+    follow: yes
+
+
+- name: If follow=no, /path/to/link will become a file and be overwritten by contents of foo.conf  
+  copy:    
+    src: /etc/foo.conf    
+    dest: /path/to/link  # link to /path/to/file    
+    follow: no
