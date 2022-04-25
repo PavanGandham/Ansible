@@ -1,0 +1,20 @@
+---
+  - name: Playbook for installing nginx
+    hosts: web:app
+    tasks:
+      - name: Perform Apt Update
+        shell: apt update
+      
+      - name: Install nginx using apt
+        shell: apt install -y nginx
+      
+      - name: Start nginx service
+        shell: service nginx start
+      
+  - name: Playbook for installing jq,wget & curl
+    hosts: db
+    tasks:
+      - name: Perform apt update
+        shell: apt install -y jq wget curl
+  
+
