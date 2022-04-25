@@ -15,6 +15,9 @@
     hosts: db
     tasks:
       - name: Perform apt update
+        shell: apt update -y
+      
+      - name: Installing jq,wget & curl
         shell: apt install -y jq wget curl
   
 
