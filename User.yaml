@@ -1,0 +1,32 @@
+---
+  - name: Creating a new user group in web servers
+    hosts: web
+    #remote_user: ubuntu
+    #become: true
+    gather_facts: no
+    ignore_errors: yes
+    tasks:
+      - name: determine available groups
+        getent:
+          database: group
+
+      - name: determine available users
+        getent:
+          database: passwd
+        
+      - name: creating new group in web servers
+        group:
+          name: webuser
+          state: present
+          gid: 1100
+    tags:
+      - group
+
+  - name: Creating new user in web servers
+    hosts: web
+    gather_facts: no
+    tasks:
+      - name: creating new user john in group 
+        user:
+          name: john
+
