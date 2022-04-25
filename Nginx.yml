@@ -29,7 +29,7 @@
       - name: Performing Apt Update
         shell: apt update
 
-      - name: Installing Tools like [jq]-[curl]-[wget]-[unzip]
+      - name: Installing Tools like [jq, curl, wget, unzip]
         apt:
           name: "{{ item }}"
           state: present
