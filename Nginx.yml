@@ -21,6 +21,7 @@
         service:
           name: nginx
           state: started
+          enabled: true
         tags:
           - service
     tags:

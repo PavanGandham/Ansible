@@ -1,10 +1,12 @@
 ---
   - name: Creating a new user group in web servers
     hosts: web
-    #remote_user: ubuntu
+    #remote_user: root
     #become: true
     gather_facts: no
-    ignore_errors: yes
+    ignore_errors: yes  # Will Proceed to next task even it failed.
+    max_fail_percentage: 30   # Aborts play when a certain threshold of failures has been reached
+    serial: 2           # Executes the playbook one host at a time.
     tasks:
       - name: determine available groups
         getent:
@@ -14,11 +16,15 @@
         getent:
           database: passwd
         
-      - name: creating new group in web servers
+      - name: setup new group with group id 1900 in web servers when not available
         group:
           name: webuser
           state: present
-          gid: 1100
+          gid: 1900
+        when:
+          - "'webuser' not in ansible_facts.getent_group"
+          - "'1900' not in item.value"
+        loop: "{{ ansible_facts.getent_group | dict2items }}"
     tags:
       - group
 
