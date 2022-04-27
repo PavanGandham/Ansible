@@ -1,9 +1,20 @@
+#Requirement
+
+#1. Check if user tomuser belongs to group tomuser & exists no matter what the uid, gid is; then simply do nothing i.e. we are good.
+
+#2.if group tomuser does not exist create group tomuser with gid 1900.
+
+#3.if user tomuser does not exist create user tomuser with gid 1900 and assign in the the group tomuser.
+
+#4.Finally if uid, gid 1900 is already in use while creating user and group then prefer uid,gid as 2020 and 
+#if that too is in use then any random unique number is fine for both.
+
 ---
   - name: Creating a new user group in web servers
     hosts: web
     #remote_user: root
     #become: true
-    gather_facts: no
+    gather_facts: yes
     ignore_errors: yes  # Will Proceed to next task even it failed.
     max_fail_percentage: 30   # Aborts play when a certain threshold of failures has been reached
     serial: 2           # Executes the playbook one host at a time.
@@ -15,8 +26,8 @@
       - name: determine available users
         getent:
           database: passwd
-        
-      - name: setup new group with group id 1900 in web servers when not available
+
+      - name: setup group with gid 1900 when not available
         group:
           name: webuser
           state: present
@@ -25,14 +36,72 @@
           - "'webuser' not in ansible_facts.getent_group"
           - "'1900' not in item.value"
         loop: "{{ ansible_facts.getent_group | dict2items }}"
-    tags:
-      - group
 
-  - name: Creating new user in web servers
-    hosts: web
-    gather_facts: no
-    tasks:
-      - name: creating new user john in group 
-        user:
-          name: john
+      - name: set group with gid 2020 when not available
+        group:
+          name: webuser
+          gid: 2020
+        when:
+          - "'webuser' not in ansible_facts.getent_group"
+          - "'2020' not in item.value"
+        loop: "{{ ansible_facts.getent_group | dict2items }}"
+
+    - name: create random number
+      set_fact:
+        random_num: "{{ range(1500, 2000) | random(seed=item) }}"
+      run_once: yes
+      with_items:
+        - string
+
+    - name: set group with random gid when 2020 already in use
+      group:
+        name: webuser
+        gid: "{{ random_num }}"
+      when:
+        - "'webuser' not in ansible_facts.getent_group"
+        - "'2020' in item.value"
+      loop: "{{ ansible_facts.getent_group | dict2items }}"
+
+    - name: set fact when webuser exists
+      set_fact:
+        user_exists: true
+      when: '"webuser" in item.key'
+      loop: "{{ ansible_facts.getent_passwd | dict2items }}"
+
+    - name: set fact when webuser does not exists
+      set_fact:
+        user_exists: false
+      when: '"webuser" not in item.key'
+      loop: "{{ ansible_facts.getent_passwd | dict2items }}"
+
+    - name: set user with uid 1900, and group webuser when not available
+      user:
+        name: john
+        uid: 1900
+        group: webuser
+      when:
+        - not user_exists
+        - "'1900' not in item.value[1]"
+      loop: "{{ ansible_facts.getent_passwd | dict2items }}"
+
+    - name: set user with uid 2020, and group webuser when not available
+      user:
+        name: john
+        uid: 2020
+        group: webuser
+      when:
+        - not user_exists
+        - "'2020' not in item.value[1]"
+      loop: "{{ ansible_facts.getent_passwd | dict2items }}"
+
+    - name: set user with random uid, and group webuser when not available
+      user:
+        name: webuser
+        uid: "{{ random_num }}"
+        group: webuser
+      when:
+        - not user_exists
+        - "'2020' in item.value[1]"
+      loop: "{{ ansible_facts.getent_passwd | dict2items }}"
+
 
