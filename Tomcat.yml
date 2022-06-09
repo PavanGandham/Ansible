@@ -1,0 +1,25 @@
+---
+  - name: Ansible Playbook for installing Tomcat Server
+    hosts: dev:test
+    # hosts: all
+    become: true
+    gather_facts: yes
+    ignore_errors: yes
+    tasks:
+      - name: Install java OpenJDK
+        apt:
+          name: openjdk-11-jre-headless
+
+      - name: Download Tomcat Server packages
+        get_url:
+          url: http://mirrors.estointernet.in/apache/tomcat/tomcat-9/v9.0.44/bin/apache-tomcat-9.0.44.tar.gz
+          dest: /usr/local
+
+      - name: Extract Tomcat packages
+        unarchive:
+          src: /usr/local/apache-tomcat-9.0.44.tar.gz
+          dest: /usr/local
+          remote_src: yes
+
+      - name: Start Tomcat Services
+        shell: nohup /usr/local/apache-tomcat-9.0.44/bin/startup.sh
