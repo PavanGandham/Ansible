@@ -1,0 +1,5 @@
+---
+  - name: Playbook for Testing Role
+    hosts: web
+    roles:
+      - myproject/roles/mynginx
